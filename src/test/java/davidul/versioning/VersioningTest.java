@@ -8,27 +8,45 @@ import com.couchbase.client.java.kv.MutationResult;
 import davidul.basic.CouchbaseConnection;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.testcontainers.containers.Container;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.DockerHealthcheckWaitStrategy;
+import org.testcontainers.containers.wait.strategy.HttpWaitStrategy;
+import org.testcontainers.containers.wait.strategy.WaitStrategy;
 import org.testcontainers.couchbase.BucketDefinition;
 import org.testcontainers.couchbase.CouchbaseContainer;
 import org.testcontainers.couchbase.CouchbaseService;
 import org.testcontainers.utility.DockerImageName;
+
+import java.io.IOException;
 
 public class VersioningTest {
 
     private String id = "I::0001";
 
     @Test
-    public void swap() {
-       /* final BucketDefinition aDefault = new BucketDefinition("default");
+    public void swap() throws IOException, InterruptedException {
+        String command = "couchbase-cli cluster-init -c 0.0.0.0 " +
+                "--cluster-username Administrator " +
+                "--cluster-password password " +
+                "--services data,index,query " +
+                "--cluster-ramsize 512 n" +
+                "--cluster-index-ramsize 256";
+
+
+        final BucketDefinition aDefault = new BucketDefinition("default");
         final DockerImageName dockerImageName = DockerImageName.parse("couchbase").asCompatibleSubstituteFor("couchbase/server").withTag("latest");
         final CouchbaseContainer couchbaseContainer = new CouchbaseContainer(dockerImageName)
                 .withBucket(aDefault)
-                .withCredentials("Administrator", "Administrator")
-                .withEnabledServices(CouchbaseService.KV, CouchbaseService.INDEX, CouchbaseService.QUERY);
-        couchbaseContainer.start();
+                .withCredentials("Administrator", "password")
+                .withEnabledServices(CouchbaseService.KV, CouchbaseService.INDEX, CouchbaseService.QUERY)
 
-        final String connectionString = couchbaseContainer.getConnectionString();*/
-        final Collection collection = CouchbaseConnection.collection();
+                ;
+        couchbaseContainer.start();
+        final String connectionString = couchbaseContainer.getConnectionString();
+
+        //final String connectionString = couchbaseContainer.getConnectionString();
+        final Collection collection = CouchbaseConnection.collection(connectionString);
         if(collection.exists(id).exists())
             collection.remove(id);
 
