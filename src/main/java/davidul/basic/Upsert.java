@@ -5,9 +5,10 @@ import com.couchbase.client.java.json.JsonObject;
 import com.couchbase.client.java.kv.MutationResult;
 
 public class Upsert {
-    public static void main(String[] args) {
+
+    public void upsert(String connectionString) {
         // get a collection reference
-        Collection collection = CouchbaseConnection.collection();
+        Collection collection = CouchbaseConnection.collection(connectionString);
 
         //We will create very simple Json document
         final JsonObject put = JsonObject
