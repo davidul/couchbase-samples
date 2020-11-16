@@ -4,14 +4,11 @@ import com.couchbase.client.core.cnc.EventBus;
 import davidul.ContainerSetup;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.testcontainers.couchbase.BucketDefinition;
-import org.testcontainers.couchbase.CouchbaseContainer;
-import org.testcontainers.couchbase.CouchbaseService;
-import org.testcontainers.utility.DockerImageName;
 
 public class UpsertTest {
 
     private static String connectionString;
+    private static final String ID_1 = "ID::1";
 
     @BeforeClass
     public static void setup(){
@@ -23,6 +20,6 @@ public class UpsertTest {
         final EventBus eventBus = CouchbaseConnection.cluster(connectionString).environment().eventBus();
         eventBus.subscribe(e -> System.out.println(e));
         final Upsert upsert = new Upsert();
-        upsert.upsert(connectionString);
+        upsert.upsert(connectionString,  ID_1);
     }
 }

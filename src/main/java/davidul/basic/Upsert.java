@@ -6,7 +6,7 @@ import com.couchbase.client.java.kv.MutationResult;
 
 public class Upsert {
 
-    public void upsert(String connectionString) {
+    public void upsert(String connectionString, String id) {
         // get a collection reference
         Collection collection = CouchbaseConnection.collection(connectionString);
 
@@ -14,8 +14,7 @@ public class Upsert {
         final JsonObject put = JsonObject
                 .create()
                 .put("firstName", "David");
-        //store it under key "ID::1"
-        final MutationResult upsert = collection.upsert("ID::1", put);
+        final MutationResult upsert = collection.upsert(id, put);
         System.out.println("Mutation result:" );
         System.out.println("CAS: " + upsert.cas());
         System.out.println("Token: " + upsert.mutationToken());
