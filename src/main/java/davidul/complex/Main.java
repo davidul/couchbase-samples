@@ -61,7 +61,9 @@ public class Main extends AbstractVerticle {
     private void deployFollowers() {
         counters.forEach(counter -> {
             final DeploymentOptions deploymentOptions = new DeploymentOptions();
-            final io.vertx.core.json.JsonObject jsonObject = new io.vertx.core.json.JsonObject().put("counter", counter);
+            final io.vertx.core.json.JsonObject jsonObject = new io.vertx.core.json.JsonObject()
+                    .put("counter", counter)
+                    .put("leader", MAIN_COUNTER);
             deploymentOptions.setConfig(jsonObject);
             deploymentOptions.setWorker(true);
             vertx.deployVerticle(new CounterUpdaterTrx(), deploymentOptions);
