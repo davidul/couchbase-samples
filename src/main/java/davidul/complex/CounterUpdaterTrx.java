@@ -36,11 +36,14 @@ public class CounterUpdaterTrx extends AbstractVerticle {
     private EventBus eventBus;
 
     private JsonArray followers;
+    private String leader;
+    private Flux<Message> stringFlux;
 
     @Override
     public void start() {
         final String counter = config().getString("counter");
         followers = config().getJsonArray("followers");
+        leader = config().getString("leader");
         eventBus = vertx.eventBus();
         eventBus.consumer(counter, message -> {
             final String body = (String) message.body();
@@ -55,15 +58,7 @@ public class CounterUpdaterTrx extends AbstractVerticle {
         final GetResult result = collection.get(id);
         if (result.cas() == -1) {
             LOGGER.info("Item is locked " + counterName + " " + id + " " + value);
-            Flux.<Message>push(fluxSink -> {
-                fluxSink.next(new Message(value, id));
-            }).distinct(Message::hashCode)
-                    .delayElements(Duration.ofSeconds(1))
-                    .subscribe(c -> {
-                        LOGGER.info("Sending retrials " + c.toString());
-                        eventBus.send(counterName, c.toString());
-                    });
-
+            eventBus.send(counterName, new Message(value, id).toString());
             LOGGER.info("Retry");
             return;
         }
@@ -80,10 +75,18 @@ public class CounterUpdaterTrx extends AbstractVerticle {
                 final JsonObject jsonObject = getResult.contentAsObject();
                 LOGGER.info("BEFORE " + counterName + jsonObject.toString());
 
-                final AtomicInteger counter = new AtomicInteger((Integer) jsonObject.get(counterName));
-                if (Integer.parseInt(value) > counter.get())
-                    counter.getAndSet(Integer.parseInt(value));
-                final JsonObject put = jsonObject.put(counterName, counter.intValue());
+                Integer counter = jsonObject.getInt(counterName);
+                final Integer leaderCounter = jsonObject.getInt(leader);
+                final AtomicInteger counterAtomic = new AtomicInteger(counter);
+                if(leaderCounter != null){
+                    if(counterAtomic.get() < leaderCounter){
+                        counter = counterAtomic.incrementAndGet();
+                    }
+                }else {
+                    counter = counterAtomic.incrementAndGet();
+                }
+
+                final JsonObject put = jsonObject.put(counterName, counter);
                 collection.replace(id, put, ReplaceOptions.replaceOptions().cas(lockedCas));
                 LOGGER.info("Replaced " + counterName + " with value " + counter.intValue());
                 ctx.commit();
