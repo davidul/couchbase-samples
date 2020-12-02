@@ -15,7 +15,6 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import reactor.core.publisher.Flux;
 
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,7 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class CounterUpdaterTrx extends AbstractVerticle {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CounterUpdaterTrx.class);
-    final Transactions tx = Transactions.create(CouchbaseConnection.cluster(), TransactionConfigBuilder.create()
+    final Transactions tx = Transactions.create(CouchbaseConnection.cluster(Main.CONNECTION_STRING), TransactionConfigBuilder.create()
             .durabilityLevel(TransactionDurabilityLevel.PERSIST_TO_MAJORITY)
             .logOnFailure(true, Event.Severity.WARN)
             .build());
@@ -37,7 +36,6 @@ public class CounterUpdaterTrx extends AbstractVerticle {
 
     private JsonArray followers;
     private String leader;
-    private Flux<Message> stringFlux;
 
     @Override
     public void start() {
@@ -49,7 +47,7 @@ public class CounterUpdaterTrx extends AbstractVerticle {
             final String body = (String) message.body();
             final String[] split = body.split(",");
             LOGGER.info("Received Message " + counter + " " + message.body());
-            updateCounter(split[1], counter, split[0], "localhost");
+            updateCounter(split[1], counter, split[0], Main.CONNECTION_STRING);
         });
     }
 
@@ -58,7 +56,7 @@ public class CounterUpdaterTrx extends AbstractVerticle {
         final GetResult result = collection.get(id);
         if (result.cas() == -1) {
             LOGGER.info("Item is locked " + counterName + " " + id + " " + value);
-            eventBus.send(counterName, new Message(value, id).toString());
+            eventBus.send(counterName, new Message(value, id, counterName).toString());
             LOGGER.info("Retry");
             return;
         }
@@ -95,12 +93,12 @@ public class CounterUpdaterTrx extends AbstractVerticle {
         } catch (Exception e) {
             LOGGER.info("Failed with " + counterName + " " + id + " " + value);
             e.printStackTrace();
-            eventBus.send(counterName, new Message(value, id).toString());
+            eventBus.send(counterName, new Message(value, id, counterName).toString());
         }
 
 
         if (followers != null) {
-            followers.stream().forEach(o -> eventBus.send((String) o, new Message(value, id).toString()));
+            followers.stream().forEach(o -> eventBus.send((String) o, new Message(value, id, counterName).toString()));
         }
     }
 

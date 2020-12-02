@@ -23,8 +23,17 @@ public class MainCounterGenerator extends AbstractVerticle {
     }
 
     public void generate(){
+        System.out.println("Generating");
         final EventBus eventBus = vertx.eventBus();
-        Flux.range(1,100)
-                .subscribe(integer -> eventBus.send(Main.MAIN_COUNTER, new Message(integer.toString(), ID).toString()));
+
+        eventBus.consumer("generator", m -> {
+            final Flux<String> ids = Flux.range(1, Main.IDS).map(i -> "ID::" + i);
+            final Flux<String> range = Flux.range(1, 100).map(Object::toString);
+            ids.flatMap(id -> range.map(r -> new Message(r,id, Main.MAIN_COUNTER)))
+                    .subscribe(c -> {
+                        System.out.println("Sending " + c.toString());
+                        eventBus.send(Main.KAFKA_PUBLISHER, c.toString());
+                    });
+        });
     }
 }

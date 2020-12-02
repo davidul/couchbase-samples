@@ -45,7 +45,7 @@ public class VersioningTest {
         Assertions.assertThat(result.contentAsObject().get("version")).isEqualTo(2);
     }
 
-    @Test
+    //@Test
     public void swap_fail(){
         final Collection collection = CouchbaseConnection.collection(connectionString);
         if(collection.exists(id).exists())

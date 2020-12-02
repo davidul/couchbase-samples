@@ -10,10 +10,12 @@ import java.util.Objects;
 public class Message {
     private final String count;
     private final String id;
+    private final String counter;
 
-    public Message(String count, String id) {
+    public Message(String count, String id, String counter) {
         this.count = count;
         this.id = id;
+        this.counter = counter;
     }
 
     public String getCount() {
@@ -22,6 +24,10 @@ public class Message {
 
     public String getId() {
         return id;
+    }
+
+    public String getCounter() {
+        return counter;
     }
 
     @Override
@@ -35,14 +41,15 @@ public class Message {
 
     @Override
     public int hashCode() {
-        return Objects.hash(count, id);
+        return Objects.hash(count, id, counter);
     }
 
     @Override
     public String toString() {
         final StringBuffer sb = new StringBuffer();
         sb.append(count).append(",");
-        sb.append(id);
+        sb.append(id).append(",");
+        sb.append(counter);
         return sb.toString();
     }
 }

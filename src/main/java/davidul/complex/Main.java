@@ -3,11 +3,18 @@ package davidul.complex;
 import com.couchbase.client.java.Collection;
 import com.couchbase.client.java.json.JsonObject;
 import davidul.basic.CouchbaseConnection;
+import davidul.complex.kafka.Consumer;
+import davidul.complex.kafka.Publisher;
 import io.vavr.collection.List;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Launcher;
+import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.spi.cluster.ClusterManager;
+import io.vertx.spi.cluster.zookeeper.ZookeeperClusterManager;
+
+import static io.vavr.collection.List.range;
 
 /**
  * Configure and deploy the counting verticles.
@@ -24,9 +31,15 @@ public class Main extends AbstractVerticle {
 
     public static final String MAIN_COUNTER = "main_counter";
 
+    public static final String KAFKA_PUBLISHER = "kafka-publisher";
+
     public static final int NUM_COUNTERS = 3;
 
+    public static final int IDS = 100;
+
     private static List<String> counters;
+
+    public static final String CONNECTION_STRING = "172.16.101.2";
 
     public static void main(String[] args) {
         Launcher.main(new String[]{"run", Main.class.getName()});
@@ -34,9 +47,13 @@ public class Main extends AbstractVerticle {
 
     @Override
     public void start() {
-        counters = List.range(0, NUM_COUNTERS)
+        counters = range(0, NUM_COUNTERS)
                         .map(i -> "c" + i + "_counter");
         initCouchbase();
+        final DeploymentOptions deploymentOptions = new DeploymentOptions();
+        deploymentOptions.setWorker(true);
+        vertx.deployVerticle(new Publisher(), deploymentOptions);
+        vertx.deployVerticle(new Consumer(), deploymentOptions);
         deployMainCounter();
         deployFollowers();
 
@@ -55,6 +72,7 @@ public class Main extends AbstractVerticle {
         deploymentOptions.setConfig(counter);
         deploymentOptions.setWorker(true);
 
+        System.out.println("Deploying verticles");
         vertx.deployVerticle(new CounterUpdaterTrx(), deploymentOptions);
     }
 
@@ -71,11 +89,14 @@ public class Main extends AbstractVerticle {
     }
 
     public void initCouchbase(){
-        final Collection collection = CouchbaseConnection.collection();
+        final Collection collection = CouchbaseConnection.collection(CONNECTION_STRING);
         final JsonObject jsonObject = JsonObject.create().put(MAIN_COUNTER, 0);
         counters.forEach(counter -> jsonObject.put(counter, 0));
 
-        collection.upsert(MainCounterGenerator.ID, jsonObject);
+        range(1, IDS)
+                .forEach(id ->
+                    collection.upsert("ID::" + id, jsonObject));
+
     }
     public static List<String> getCounters() {
         return counters;

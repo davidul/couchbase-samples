@@ -29,11 +29,10 @@ public class Versioning {
         final Cluster cluster = CouchbaseConnection.cluster();
         Transactions transactions = Transactions.create(cluster);
 
-       /* transactions.reactive().run(ctx -> {
-
-        })
-                .doOnError(throwable -> throwable.printStackTrace())
-                .doOnSuccess();*/
+        transactions.run(ctx -> {
+            final Collection collection = CouchbaseConnection.collection();
+            final TransactionGetResult transactionGetResult = ctx.get(collection, key);
+        });
 
         transactions.run(ctx -> {
             final Collection collection = CouchbaseConnection.collection();

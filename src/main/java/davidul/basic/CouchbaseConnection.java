@@ -4,6 +4,9 @@ import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.Collection;
 
+/**
+ * @author ulicny.david@gmail.com
+ */
 public class CouchbaseConnection {
 
     private static final String bucketName = "default";
