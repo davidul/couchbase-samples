@@ -2,22 +2,28 @@ package davidul.complex;
 
 import com.couchbase.client.core.cnc.Event;
 import com.couchbase.client.java.Collection;
-import com.couchbase.client.java.json.JsonObject;
 import com.couchbase.client.java.kv.GetResult;
 import com.couchbase.client.java.kv.ReplaceOptions;
+import com.couchbase.client.java.kv.UnlockOptions;
 import com.couchbase.transactions.TransactionDurabilityLevel;
 import com.couchbase.transactions.TransactionResult;
 import com.couchbase.transactions.Transactions;
 import com.couchbase.transactions.config.TransactionConfigBuilder;
 import davidul.basic.CouchbaseConnection;
+import davidul.complex.document.Counter;
+import davidul.complex.document.DocumentWrapper;
+import davidul.complex.kafka.Publisher;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.List;
 
 
 /**
@@ -26,14 +32,15 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class CounterUpdaterTrx extends AbstractVerticle {
 
+    public static final String ADDRESS = CounterUpdaterTrx.class.getName();
     private static final Logger LOGGER = LoggerFactory.getLogger(CounterUpdaterTrx.class);
+
     final Transactions tx = Transactions.create(CouchbaseConnection.cluster(Main.CONNECTION_STRING), TransactionConfigBuilder.create()
             .durabilityLevel(TransactionDurabilityLevel.PERSIST_TO_MAJORITY)
             .logOnFailure(true, Event.Severity.WARN)
             .build());
 
     private EventBus eventBus;
-
     private JsonArray followers;
     private String leader;
 
@@ -43,63 +50,91 @@ public class CounterUpdaterTrx extends AbstractVerticle {
         followers = config().getJsonArray("followers");
         leader = config().getString("leader");
         eventBus = vertx.eventBus();
-        eventBus.consumer(counter, message -> {
-            final String body = (String) message.body();
-            final String[] split = body.split(",");
-            LOGGER.info("Received Message " + counter + " " + message.body());
-            updateCounter(split[1], counter, split[0], Main.CONNECTION_STRING);
+        eventBus.consumer(ADDRESS, message -> {
+            LOGGER.info("+++++++++++++++++++++++++++++++++++++++++++++++");
+            final String counterName = message.headers().get("COUNTER");
+            LOGGER.info("Updating " + counterName);
+            final DocumentWrapper documentWrapper = Json.decodeValue((String) message.body(), DocumentWrapper.class);
+            LOGGER.info(documentWrapper.toString());
+            updateCounter(counterName, Main.CONNECTION_STRING, documentWrapper);
         });
     }
 
-    public void updateCounter(final String id, final String counterName, final String value, final String connectionString) {
+    public void updateCounter(final String counterName,
+                              final String connectionString,
+                              DocumentWrapper documentWrapper) {
         final Collection collection = CouchbaseConnection.collection(connectionString);
-        final GetResult result = collection.get(id);
+
+        final GetResult result = collection.get(documentWrapper.getDocumentId());
         if (result.cas() == -1) {
-            LOGGER.info("Item is locked " + counterName + " " + id + " " + value);
-            eventBus.send(counterName, new Message(value, id, counterName).toString());
+            LOGGER.info("+++++++++++++++++++++++++++++++++++++++++++++++++++");
+            LOGGER.info("Item is locked " + documentWrapper.getDocumentId());
+            final DeliveryOptions deliveryOptions = new DeliveryOptions();
+            deliveryOptions.addHeader("topic", "my-topic");
+            LOGGER.info("+++++++++++++++++++++++++++++++++++++++++++++++++++++++");
             LOGGER.info("Retry");
+            eventBus.send(Publisher.ADDRESS, io.vertx.core.json.JsonObject.mapFrom(documentWrapper), deliveryOptions);
             return;
         }
 
         try {
             final TransactionResult run = tx.run((ctx) -> {
-                LOGGER.info("Before lock " + counterName + " " + id + " " + value);
 
-                final GetResult getResult = collection.getAndLock(id, Duration.ofMillis(100));
+                final GetResult getResult = collection.getAndLock(documentWrapper.getDocumentId(), Duration.ofMillis(100));
 
                 final long lockedCas = getResult.cas();
-                LOGGER.info("After lock " + counterName + " " + id + " " + value);
+                final DocumentWrapper existinDocument = getResult.contentAs(DocumentWrapper.class);
+                LOGGER.info("After lock " + counterName + " " + documentWrapper.getDocumentId() + "::" + documentWrapper.getDocumentVersion());
+                LOGGER.info("Existing version " + existinDocument.getDocumentId() + "::" + existinDocument.getDocumentVersion());
 
-                final JsonObject jsonObject = getResult.contentAsObject();
-                LOGGER.info("BEFORE " + counterName + jsonObject.toString());
+                if(existinDocument.getDocumentVersion() > documentWrapper.getDocumentVersion()){
+                    Counter counter = getCounter(existinDocument.getCounters(), counterName);
 
-                Integer counter = jsonObject.getInt(counterName);
-                final Integer leaderCounter = jsonObject.getInt(leader);
-                final AtomicInteger counterAtomic = new AtomicInteger(counter);
-                if(leaderCounter != null){
-                    if(counterAtomic.get() < leaderCounter){
-                        counter = counterAtomic.incrementAndGet();
-                    }
+                    Integer counterValue = counter.getCounterValue();
+                    counterValue = counterValue + 1;
+                    counter.setCounterValue(counterValue);
+                    final List<Counter> counters = replaceCounter(existinDocument.getCounters(), counter);
+                    existinDocument.setCounters(counters);
+                    existinDocument.setCharCount(documentWrapper.getCharCount());
+                    existinDocument.setTrekMessage(documentWrapper.getTrekMessage());
+                    LOGGER.info("Replacing " + existinDocument.toString());
+                    collection.replace(existinDocument.getDocumentId(), existinDocument, ReplaceOptions.replaceOptions().cas(lockedCas));
                 }else {
-                    counter = counterAtomic.incrementAndGet();
+                    LOGGER.info("+++++++++++++++++++++++++++++++++++++++++++++++");
+                    LOGGER.info("Unlocking");
+                    collection.unlock(existinDocument.getDocumentId(), lockedCas, UnlockOptions.unlockOptions().timeout(Duration.ofMillis(100)));
                 }
 
-                final JsonObject put = jsonObject.put(counterName, counter);
-                collection.replace(id, put, ReplaceOptions.replaceOptions().cas(lockedCas));
-                LOGGER.info("Replaced " + counterName + " with value " + counter.intValue());
+               // LOGGER.info("Replaced " + counterName + " with value " + counter.intValue());
                 ctx.commit();
             });
             LOGGER.info("Transaction takes " + run.timeTaken().toMillis());
         } catch (Exception e) {
-            LOGGER.info("Failed with " + counterName + " " + id + " " + value);
+            LOGGER.info("Failed with " + counterName + " " + documentWrapper.getDocumentId());
             e.printStackTrace();
-            eventBus.send(counterName, new Message(value, id, counterName).toString());
-        }
-
-
-        if (followers != null) {
-            followers.stream().forEach(o -> eventBus.send((String) o, new Message(value, id, counterName).toString()));
+            final DeliveryOptions deliveryOptions = new DeliveryOptions();
+            deliveryOptions.addHeader("topic", "my-topic");
+            eventBus.send(Publisher.ADDRESS, JsonObject.mapFrom(documentWrapper), deliveryOptions);
         }
     }
 
+    public Counter getCounter(List<Counter> counters, String counterName){
+        for(Counter c : counters){
+            if(c.getCounterName().equalsIgnoreCase(counterName)){
+                LOGGER.info("Existing counter " + counterName);
+                return c;
+            }
+        }
+        LOGGER.info("Creating new counter " + counterName);
+        return new Counter(counterName, 0);
+    }
+
+    public List<Counter> replaceCounter(List<Counter> counters, Counter counter){
+        final boolean remove = counters.remove(counter);
+        LOGGER.info("Removed counter " + counter.getCounterName() + " " +remove);
+        counters.add(counter);
+        LOGGER.info("Add counter " + counter.getCounterName());
+        return counters;
+
+    }
 }

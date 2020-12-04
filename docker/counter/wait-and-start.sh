@@ -11,11 +11,11 @@ log() {
   i=`expr $i + 1`
 }
 
-for k in {1..40}
+for k in {1..30}
 do
   log "Waitig $k"
   sleep 1
-  if [ $k = 40 ]; then
+  if [ $k = 30 ]; then
     java -jar /usr/verticles/couchbase-samples-1.0-SNAPSHOT-fat.jar
   fi
 done

@@ -2,17 +2,21 @@ package davidul.complex;
 
 import com.couchbase.client.java.Collection;
 import com.couchbase.client.java.json.JsonObject;
+import com.github.javafaker.Faker;
 import davidul.basic.CouchbaseConnection;
+import davidul.complex.document.DocumentWrapper;
+import davidul.complex.document.TrekMessage;
 import davidul.complex.kafka.Consumer;
 import davidul.complex.kafka.Publisher;
 import io.vavr.collection.List;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Launcher;
-import io.vertx.core.VertxOptions;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.spi.cluster.ClusterManager;
-import io.vertx.spi.cluster.zookeeper.ZookeeperClusterManager;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 import static io.vavr.collection.List.range;
 
@@ -35,7 +39,7 @@ public class Main extends AbstractVerticle {
 
     public static final int NUM_COUNTERS = 3;
 
-    public static final int IDS = 100;
+    public static final int IDS = 10;
 
     private static List<String> counters;
 
@@ -49,11 +53,14 @@ public class Main extends AbstractVerticle {
     public void start() {
         counters = range(0, NUM_COUNTERS)
                         .map(i -> "c" + i + "_counter");
-        initCouchbase();
+        //initCouchbase();
         final DeploymentOptions deploymentOptions = new DeploymentOptions();
         deploymentOptions.setWorker(true);
-        vertx.deployVerticle(new Publisher(), deploymentOptions);
+        vertx.deployVerticle(new DocumentUpdater());
+        vertx.deployVerticle(new NumberOfCharProcessor());
+        deployKafkaPublisher();
         vertx.deployVerticle(new Consumer(), deploymentOptions);
+
         deployMainCounter();
         deployFollowers();
 
@@ -70,7 +77,7 @@ public class Main extends AbstractVerticle {
                 .put("followers", followers);
 
         deploymentOptions.setConfig(counter);
-        deploymentOptions.setWorker(true);
+       // deploymentOptions.setWorker(true);
 
         System.out.println("Deploying verticles");
         vertx.deployVerticle(new CounterUpdaterTrx(), deploymentOptions);
@@ -90,17 +97,34 @@ public class Main extends AbstractVerticle {
 
     public void initCouchbase(){
         final Collection collection = CouchbaseConnection.collection(CONNECTION_STRING);
-        final JsonObject jsonObject = JsonObject.create().put(MAIN_COUNTER, 0);
-        counters.forEach(counter -> jsonObject.put(counter, 0));
+
+        final Faker faker = new Faker();
 
         range(1, IDS)
-                .forEach(id ->
-                    collection.upsert("ID::" + id, jsonObject));
+                .forEach(id -> {
+                    final TrekMessage trekMessage = new TrekMessage(id.toString(),
+                            faker.starTrek().location(),
+                            faker.starTrek().specie(),
+                            faker.starTrek().character(),
+                            LocalDateTime.now());
+                    final DocumentWrapper documentWrapper = new DocumentWrapper(trekMessage, 1, new ArrayList<>(), "ID::" + id);
+                    final JsonObject jsonObject1 = JsonObject.fromJson(Json.encode(documentWrapper));
+                    collection.upsert("ID::" + id, jsonObject1);
+                });
 
     }
     public static List<String> getCounters() {
         return counters;
     }
 
+    public void deployKafkaPublisher(){
+        final DeploymentOptions deploymentOptions = new DeploymentOptions();
+        final io.vertx.core.json.JsonObject bootstrap = new io.vertx.core.json.JsonObject()
+                .put("bootstrap", "172.16.101.6:9092")
+                .put("topic", "my-topic");
+        deploymentOptions.setWorker(true);
+        deploymentOptions.setConfig(bootstrap);
+        vertx.deployVerticle(new Publisher(), deploymentOptions);
+    }
 
 }

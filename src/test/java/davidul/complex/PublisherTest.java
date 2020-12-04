@@ -1,18 +1,18 @@
 package davidul.complex;
 
-import com.google.gson.Gson;
+import com.github.javafaker.Faker;
+import davidul.complex.document.DocumentWrapper;
+import davidul.complex.document.TrekMessage;
 import davidul.complex.kafka.Publisher;
-import io.vavr.collection.List;
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
-import io.vertx.ext.unit.Async;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
-import io.vertx.ext.unit.TestSuite;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
-import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.MockProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -21,6 +21,7 @@ import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Properties;
 
@@ -30,11 +31,21 @@ public class PublisherTest {
     public static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"));
     private Vertx vertx;
 
+    private class TestProducer extends MockProducer<String, String>{
+
+    }
+
 
     @Before
     public void setUp(TestContext context) throws IOException {
         vertx = Vertx.vertx();
-        vertx.deployVerticle(Publisher.class.getName(), context.asyncAssertSuccess());
+        final io.vertx.core.json.JsonObject bootstrap = new io.vertx.core.json.JsonObject()
+                .put("bootstrap", kafka.getBootstrapServers())
+                .put("topic", "my-topic");
+
+        DeploymentOptions deploymentOptions = new DeploymentOptions();
+        deploymentOptions.setConfig(bootstrap);
+        vertx.deployVerticle(Publisher.class.getName(), deploymentOptions, context.asyncAssertSuccess());
     }
 
     @Test
@@ -46,7 +57,15 @@ public class PublisherTest {
         final NewTopic my_topic = new NewTopic("my-topic", 1, (short) 1);
         adminClient.createTopics(Collections.singletonList(my_topic));
 
-        vertx.eventBus().send(Main.KAFKA_PUBLISHER,"1,2,3");
+        final Faker faker = new Faker();
+        final TrekMessage trekMessage = new TrekMessage("1",
+                faker.starTrek().location(),
+                faker.starTrek().specie(),
+                faker.starTrek().character(),
+                LocalDateTime.now());
+        final DocumentWrapper documentWrapper = new DocumentWrapper(trekMessage, 1, Collections.emptyList(), "ID::1");
+
+        vertx.eventBus().send(Main.KAFKA_PUBLISHER, JsonObject.mapFrom(documentWrapper));
 
     }
 }

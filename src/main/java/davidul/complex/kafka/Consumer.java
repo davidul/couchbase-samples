@@ -1,6 +1,6 @@
 package davidul.complex.kafka;
 
-import davidul.complex.Message;
+import davidul.complex.NumberOfCharProcessor;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.kafka.client.consumer.KafkaConsumer;
@@ -28,9 +28,7 @@ public class Consumer extends AbstractVerticle {
 
         // use consumer for interacting with Apache Kafka
         KafkaConsumer<String, String> consumer = KafkaConsumer.create(vertx, config);
-        consumer.handler(h -> {
-            System.out.println(h.key());
-        });
+
         consumer.subscribe("my-topic", event -> {
             if(event.succeeded()){
                 LOGGER.info("Subscribed to Kafka");
@@ -39,10 +37,10 @@ public class Consumer extends AbstractVerticle {
 
         final EventBus eventBus = vertx.eventBus();
 
-        consumer.handler(h -> {
-            System.out.println("!!!!!!!!!!!! Consuming");
-            final String[] split = h.value().split(",");
-            eventBus.publish(split[2], new Message(split[1], split[0], split[2]).toString());
+        consumer.handler(consumerRecord -> {
+            LOGGER.info("!!!!!!!!!!!! Consuming");
+            final String value = consumerRecord.value();
+            eventBus.publish(NumberOfCharProcessor.ADDRESS,  value);
         });
 
     }

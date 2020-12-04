@@ -11,7 +11,6 @@ ENV PATH=${PATH}:${KAFKA_HOME}/bin
 
 COPY start-kafka.sh /tmp/
 COPY kafka_2.13-2.6.0.tgz /tmp/
-COPY server.properties $KAFKA_HOME/config
 
 RUN  chmod a+x /tmp/*.sh \
  && mv /tmp/start-kafka.sh /usr/bin \
@@ -20,6 +19,7 @@ RUN  chmod a+x /tmp/*.sh \
  && rm /tmp/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz \
  && ln -s /opt/kafka_${SCALA_VERSION}-${KAFKA_VERSION} ${KAFKA_HOME}
 
+COPY server.properties $KAFKA_HOME/config
 
 VOLUME ["/kafka"]
 

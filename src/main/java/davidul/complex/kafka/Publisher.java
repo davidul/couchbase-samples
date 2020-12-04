@@ -1,10 +1,9 @@
 package davidul.complex.kafka;
 
-import davidul.complex.Main;
-import davidul.complex.Message;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.producer.KafkaProducer;
 import io.vertx.kafka.client.producer.KafkaProducerRecord;
 import org.slf4j.Logger;
@@ -12,28 +11,35 @@ import org.slf4j.LoggerFactory;
 
 public class Publisher extends AbstractVerticle {
 
+    public static final String ADDRESS = Publisher.class.getName();
     private static final Logger LOGGER = LoggerFactory.getLogger(Publisher.class);
     private KafkaProducer<String, String> producer;
 
     @Override
     public void start() throws Exception {
-        //super.start();//172.16.101.6
         LOGGER.info("Registering Kafka");
-        producer = KafkaProducer.create(Vertx.vertx(), Config.producerProperties("172.16.101.6:9092"),String.class, String.class);
+        producer = KafkaProducer.create(Vertx.vertx(),
+                Config.producerProperties(config().getString("bootstrap")),
+                String.class,
+                String.class);
         final EventBus eventBus = vertx.eventBus();
-        eventBus.consumer(Main.KAFKA_PUBLISHER, message -> {
+
+        eventBus.consumer(ADDRESS, message -> {
             LOGGER.info("read from event bus");
-            final String body = (String) message.body();
-            final String[] split = body.split(",");
-            send(new Message(split[1], split[0], split[2]));
+            final JsonObject body = (JsonObject) message.body();
+            final String topic = message.headers().get("topic");
+            send(body, topic);
         });
 
         eventBus.send("generator", "What's up?");
     }
 
-    public void send(Message message){
-        LOGGER.info("!!!!!!!!!!!! Sending message");
-        final KafkaProducerRecord<String, String> record = KafkaProducerRecord.create("my-topic", message.getId(), message.toString());
+    public void send(JsonObject message, String topic) {
+        LOGGER.info("+++++++++++++++++++++++++++++++++++++++++++++++++ Sending message");
+        final KafkaProducerRecord<String, String> record = KafkaProducerRecord
+                .create(topic,
+                        message.getString("documentId"),
+                        message.encode());
         producer.send(record);
     }
 }
