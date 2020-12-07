@@ -32,6 +32,7 @@ public class MainCounterGenerator extends AbstractVerticle {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MainCounterGenerator.class);
 
+
     final Transactions tx = Transactions.create(CouchbaseConnection.cluster(Main.CONNECTION_STRING),
             TransactionConfigBuilder.create()
                     .durabilityLevel(TransactionDurabilityLevel.PERSIST_TO_MAJORITY)
@@ -81,7 +82,6 @@ public class MainCounterGenerator extends AbstractVerticle {
                 LOGGER.info("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
                 LOGGER.info("Sending " + c.toString());
                 lockAndUpdate(c);
-                //JsonObject.mapFrom(c)
                 eventBus.send(DocumentUpdater.ADDRESS,  JsonObject.mapFrom(c));});
 
             ids.flatMap(documentId -> range.map(trekId -> {
@@ -99,13 +99,10 @@ public class MainCounterGenerator extends AbstractVerticle {
                     .subscribe(c -> {
                         LOGGER.info("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
                         LOGGER.info("Sending " + c.toString());
-                        //lockAndUpdate(c);
-                        //JsonObject.mapFrom(c)
                         eventBus.send(DocumentUpdater.ADDRESS,  JsonObject.mapFrom(c));
                     });
         });
     }
-
 
     public void lockAndUpdate(DocumentWrapper inputDocument){
         final Collection collection = CouchbaseConnection.collection(Main.CONNECTION_STRING);
@@ -114,26 +111,6 @@ public class MainCounterGenerator extends AbstractVerticle {
                         return ctx
                                 .insert(collection.reactive(), inputDocument.getDocumentId(), inputDocument)
                                 .then(ctx.commit());
-                   /* if(collection.exists(inputDocument.getDocumentId()).exists()){
-                        LOGGER.info("+++++++++++++++++++++++++++++++++++++++++++++++++++++");
-                        LOGGER.info("DOCUMENT EXISTS");
-                        return null;
-                    }else {
-                        LOGGER.info("++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-                        LOGGER.info("CREATE DOCUMENT");
-                        inputDocument.addCounter(new Counter(this.getClass().getName(), 0));
-                        collection.upsert(inputDocument.getDocumentId(), inputDocument);
-                    }*/
-                    //final GetResult andLock = collection.getAndLock(inputDocument.getDocumentId(), Duration.ofMillis(100));
-                    /*final DocumentWrapper existingDocument = andLock.contentAs(DocumentWrapper.class);
-                    Integer documentVersion = existingDocument.getDocumentVersion();
-                    documentVersion = documentVersion.intValue() + 1;
-                    existingDocument.setDocumentVersion(documentVersion);
-                    existingDocument.setTrekMessage(inputDocument.getTrekMessage());
-                    collection.replace(existingDocument.getDocumentId(), existingDocument);*/
-              //  }catch (DocumentNotFoundException e){
-              //      collection.upsert(inputDocument.getDocumentId(), inputDocument);
-              //  }
             }).doOnError(c -> c.printStackTrace());
         }
 }
