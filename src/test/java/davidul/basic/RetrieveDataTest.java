@@ -26,11 +26,11 @@ public class RetrieveDataTest {
         final Upsert upsert = new Upsert();
         upsert.upsert(connectionString, ID_1 );
         final RetrieveData retrieveData = new RetrieveData();
-        final GetResult res1 = retrieveData.sampleRetrieve(connectionString);
+        final GetResult res1 = retrieveData.retrieveIfExist(connectionString, "ID::1");
         assertThat(res1).isNotNull();
 
         final RetrieveData retrieveData1 = new RetrieveData();
-        final GetResult res2 = retrieveData1.sampleRetrieve(connectionString);
+        final GetResult res2 = retrieveData1.retrieveIfExist(connectionString, "ID::1");
         assertThat(res2.cas()).isEqualTo(res1.cas());
     }
 
