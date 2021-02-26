@@ -1,4 +1,4 @@
-package davidul.basic;
+package davidul.basic.sampledata;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
