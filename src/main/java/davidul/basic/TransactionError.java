@@ -32,9 +32,8 @@ public class TransactionError {
         create(cluster(connectionString))
                 .reactive()
                 .run(ctx -> ctx.get(CouchbaseConnection.collection(connectionString).reactive(), key)
-            .then(ctx.commit())).doOnError(c -> {
-                    System.err.println(c.getCause());
-            });
+            .then(ctx.commit()))
+                .doOnError(c -> System.err.println(c.getCause()));
 
 
 

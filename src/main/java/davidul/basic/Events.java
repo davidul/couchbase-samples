@@ -2,10 +2,13 @@ package davidul.basic;
 
 import com.couchbase.client.core.cnc.EventBus;
 
+/**
+ * @author ulicny.david@gmail.com
+ */
 public class Events {
 
     public static void main(String[] args) {
         final EventBus eventBus = CouchbaseConnection.cluster().environment().eventBus();
-        eventBus.subscribe(e -> System.out.println(e));
+        eventBus.subscribe(System.out::println);
     }
 }

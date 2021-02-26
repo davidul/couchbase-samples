@@ -6,7 +6,6 @@ import org.testcontainers.couchbase.CouchbaseService;
 import org.testcontainers.utility.DockerImageName;
 
 public class ContainerSetup {
-
     public static String setup(){
         final BucketDefinition aDefault = new BucketDefinition("default");
         final DockerImageName dockerImageName = DockerImageName.parse("couchbase").asCompatibleSubstituteFor("couchbase/server").withTag("latest");
@@ -17,4 +16,5 @@ public class ContainerSetup {
         couchbaseContainer.start();
         return couchbaseContainer.getConnectionString();
     }
+
 }

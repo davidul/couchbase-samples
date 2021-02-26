@@ -49,19 +49,10 @@ public class GetAndLockTest {
         final Mono<GetResult> andLock1 = getAndLock.getAndLockReactive(connectionString, ID_2);
         final Mono<GetResult> andLock2 = getAndLock.getAndLockReactive(connectionString, ID_2);
 
-        andLock1.subscribe(getResult -> System.out.println("Lock1 " + getResult.cas()), ex -> ex.printStackTrace());
-        andLock2.subscribe(getResult -> System.out.println("Lock2 " + getResult.cas()), ex -> ex.printStackTrace());
+        andLock1.subscribe(getResult -> System.out.println("Lock1 " + getResult.cas()), Throwable::printStackTrace);
+        andLock2.subscribe(getResult -> System.out.println("Lock2 " + getResult.cas()), Throwable::printStackTrace);
         System.out.println("");
         final List<Integer> map = List.range(1, 10000000).map(f -> f * f);
     }
-
-    @Test
-    public void inTrx(){
-        final Upsert upsert = new Upsert();
-        upsert.upsert(connectionString, ID_1);
-        final GetAndLock getAndLock = new GetAndLock();
-        getAndLock.getAndLockInTrx(connectionString, ID_1);
-    }
-
 
 }

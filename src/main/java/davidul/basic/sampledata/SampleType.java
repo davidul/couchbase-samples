@@ -3,7 +3,9 @@ package davidul.basic.sampledata;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class SampleType {
+import java.io.Serializable;
+
+public class SampleType implements Serializable {
     @JsonProperty
     private String firstName;
     @JsonProperty

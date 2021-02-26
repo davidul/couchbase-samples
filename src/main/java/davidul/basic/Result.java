@@ -7,18 +7,21 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Optional;
 
-public class Result {
+public class Result<T> {
 
     private GetResult getResult;
 
     protected byte[] content;
+    private T contentAs;
     protected int flags;
     private long cas;
     private Optional<Instant> expiry;
     protected Transcoder transcoder;
 
-    private Result(GetResult r){
+    private Result(GetResult r, Class<T> t){
         this.getResult = r;
+        this.transcoder = CouchbaseConnection.defaultJsonTranscoder();
+        this.contentAs = r.contentAs(t);
     }
 
     private Result(byte [] content, int flags, long cas, Optional<Instant> expiry, Transcoder transcoder){
@@ -30,12 +33,12 @@ public class Result {
     }
 
 
-    public static Result of(GetResult result){
-        return new Result(result);
+    public static <T> Result<T> of(GetResult result, Class<T> type){
+        return new Result<>(result, type);
     }
 
-    public static Result from(byte [] content, int flags, long cas, Optional<Instant> expiry, Transcoder transcoder){
-        return new Result(content, flags, cas, expiry, transcoder);
+    public static <T> Result<T> from(byte [] content, int flags, long cas, Optional<Instant> expiry, Transcoder transcoder){
+        return new Result<>(content, flags, cas, expiry, transcoder);
     }
 
     public GetResult getGetResult() {
@@ -43,6 +46,7 @@ public class Result {
     }
 
     public byte[] getContent() {
+        final T o = (T) getResult.contentAs(contentAs.getClass());
         return content;
     }
 

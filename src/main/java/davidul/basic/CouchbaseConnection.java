@@ -3,6 +3,8 @@ package davidul.basic;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.Collection;
+import com.couchbase.client.java.codec.DefaultJsonSerializer;
+import com.couchbase.client.java.codec.JsonTranscoder;
 
 /**
  * @author ulicny.david@gmail.com
@@ -46,4 +48,7 @@ public class CouchbaseConnection {
         return cluster;
     }
 
+    public static JsonTranscoder defaultJsonTranscoder(){
+        return JsonTranscoder.create(DefaultJsonSerializer.create());
+    }
 }
