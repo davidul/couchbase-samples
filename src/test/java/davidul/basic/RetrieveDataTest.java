@@ -16,6 +16,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import reactor.test.StepVerifier;
 
+import java.util.Optional;
+
+import static davidul.basic.RetrieveData.retrieveIfExist;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class RetrieveDataTest {
@@ -26,25 +29,26 @@ public class RetrieveDataTest {
     @BeforeClass
     public static void setup() {
         connectionString = ContainerSetup.setup();
+        upsert(ID_1);
     }
 
     @Test
     public void sample_retrieve() {
-        final Upsert upsert = new Upsert();
-        upsert.upsert(connectionString, ID_1);
-        final RetrieveData retrieveData = new RetrieveData();
-        final GetResult res1 = retrieveData.retrieveIfExist(connectionString, "ID::1");
-        assertThat(res1).isNotNull();
+        final Optional<GetResult> res1 = retrieveIfExist(connectionString, ID_1);
+        assertThat(res1.isPresent()).isTrue();
 
-        final RetrieveData retrieveData1 = new RetrieveData();
-        final GetResult res2 = retrieveData1.retrieveIfExist(connectionString, "ID::1");
-        assertThat(res2.cas()).isEqualTo(res1.cas());
+        final Optional<GetResult> res2 = retrieveIfExist(connectionString, ID_1);
+        assertThat(res2.get().cas()).isEqualTo(res1.get().cas());
+    }
+
+    @Test
+    public void retrieve_non_existing(){
+        final Optional<GetResult> not_exist_id = retrieveIfExist(connectionString, "NOT_EXIST_ID");
+        assertThat(not_exist_id).isEmpty();
     }
 
     @Test
     public void sample_retrieve_in_tx() {
-        final Upsert upsert = new Upsert();
-        upsert.upsert(connectionString, ID_1);
         final Cluster cluster = CouchbaseConnection.cluster(connectionString);
         final Transactions transactions = Transactions.create(cluster);
         final TransactionResult run = transactions.run(ctx -> {
@@ -55,18 +59,17 @@ public class RetrieveDataTest {
 
     @Test
     public void retrieve_reactive() {
-        upsert(ID_1);
-        final GetResult getResult = CouchbaseConnection.collection(connectionString).get(ID_1);
-        System.out.println(getResult.contentAs(SampleType.class));
+        final GetResult getResult = CouchbaseConnection
+                .collection(connectionString)
+                .get(ID_1);
+
         final JsonTranscoder jsonTranscoder = JsonTranscoder.create(DefaultJsonSerializer.create());
         final Transcoder.EncodedValue encode = jsonTranscoder.encode(sampleData());
         final JsonObject jsonObject = JsonObject.fromJson(encode.encoded());
         final SampleType decode = jsonTranscoder.decode(SampleType.class, encode.encoded(), 0);
 
-        final RetrieveData retrieveData = new RetrieveData();
-
         StepVerifier
-                .create(retrieveData.retrieveReactive(connectionString, ID_1))
+                .create(RetrieveData.retrieveReactive(connectionString, ID_1))
                 .expectNext(jsonObject)
                 .verifyComplete();
     }

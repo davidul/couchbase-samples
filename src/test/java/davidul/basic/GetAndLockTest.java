@@ -1,13 +1,19 @@
 package davidul.basic;
 
+import com.couchbase.client.core.error.AmbiguousTimeoutException;
 import com.couchbase.client.java.Collection;
 import com.couchbase.client.java.kv.GetResult;
 import davidul.ContainerSetup;
-import io.vavr.collection.List;
-import org.assertj.core.api.Assertions;
+import davidul.basic.sampledata.SampleData;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
+import static davidul.basic.GetAndLock.getAndLock;
+import static davidul.basic.GetAndLock.getAndLockReactive;
+import static davidul.basic.Upsert.upsert;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class GetAndLockTest {
 
@@ -18,41 +24,40 @@ public class GetAndLockTest {
     @BeforeClass
     public static void setup(){
         connectionString = ContainerSetup.setup();
+        upsert(connectionString, ID_1);
+        upsert(connectionString, ID_2);
     }
 
     @Test
     public void _1(){
-        final Upsert upsert = new Upsert();
-        upsert.upsert(connectionString, ID_1);
-        final GetAndLock getAndLock = new GetAndLock();
-        final GetResult andLock = getAndLock.getAndLock(connectionString, ID_1);
-        /*try {
-            final GetResult andLock1 = getAndLock.getAndLock(connectionString, ID_1);
-        }catch (Exception e){
-            e.printStackTrace();
-        }*/
+        final GetResult andLock = getAndLock(connectionString, ID_1);
+
         final Collection collection = CouchbaseConnection.collection(connectionString);
         final GetResult result = collection.get(ID_1);
 
-        Assertions.assertThat(result.cas()).isEqualTo(-1);
+        //data are locked, cas == -1
+        assertThat(result.cas()).isEqualTo(-1);
+
         collection.unlock(ID_1, andLock.cas());
         final GetResult resultUnlocked = collection.get(ID_1);
 
-        Assertions.assertThat(resultUnlocked.cas()).isNotEqualTo(-1);
+        assertThat(resultUnlocked.cas()).isNotEqualTo(-1);
     }
 
     @Test
     public void reactive(){
-        final Upsert upsert = new Upsert();
-        upsert.upsert(connectionString, ID_2);
-        final GetAndLock getAndLock = new GetAndLock();
-        final Mono<GetResult> andLock1 = getAndLock.getAndLockReactive(connectionString, ID_2);
-        final Mono<GetResult> andLock2 = getAndLock.getAndLockReactive(connectionString, ID_2);
+        final Mono<GetResult> andLock1 = getAndLockReactive(connectionString, ID_2);
+        final Mono<GetResult> andLock2 = getAndLockReactive(connectionString, ID_2);
 
-        andLock1.subscribe(getResult -> System.out.println("Lock1 " + getResult.cas()), Throwable::printStackTrace);
-        andLock2.subscribe(getResult -> System.out.println("Lock2 " + getResult.cas()), Throwable::printStackTrace);
-        System.out.println("");
-        final List<Integer> map = List.range(1, 10000000).map(f -> f * f);
+        StepVerifier
+                .create(andLock1.map(GetResult::contentAsObject))
+                .expectNext(SampleData.sample())
+                .verifyComplete();
+
+        StepVerifier
+                .create(andLock2.map(GetResult::cas))
+                .expectError(AmbiguousTimeoutException.class)
+                .verify();
     }
 
 }

@@ -1,5 +1,6 @@
 package davidul;
 
+import davidul.basic.CouchbaseConnection;
 import org.testcontainers.couchbase.BucketDefinition;
 import org.testcontainers.couchbase.CouchbaseContainer;
 import org.testcontainers.couchbase.CouchbaseService;
@@ -11,7 +12,7 @@ public class ContainerSetup {
         final DockerImageName dockerImageName = DockerImageName.parse("couchbase").asCompatibleSubstituteFor("couchbase/server").withTag("latest");
         final CouchbaseContainer couchbaseContainer = new CouchbaseContainer(dockerImageName)
                 .withBucket(aDefault)
-                .withCredentials("Administrator", "password")
+                .withCredentials(CouchbaseConnection.defaultUsername, CouchbaseConnection.defaultPassword)
                 .withEnabledServices(CouchbaseService.KV, CouchbaseService.INDEX, CouchbaseService.QUERY);
         couchbaseContainer.start();
         return couchbaseContainer.getConnectionString();

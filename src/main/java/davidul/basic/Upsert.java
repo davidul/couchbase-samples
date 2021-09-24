@@ -1,22 +1,22 @@
 package davidul.basic;
 
 import com.couchbase.client.java.Collection;
+import com.couchbase.client.java.ReactiveCollection;
 import com.couchbase.client.java.json.JsonObject;
 import com.couchbase.client.java.kv.MutationResult;
+import reactor.core.publisher.Mono;
 
 public class Upsert {
 
-    public void upsert(String connectionString, String id) {
+    public static MutationResult upsert(String connectionString, String documentId, JsonObject document) {
         // get a collection reference
         Collection collection = CouchbaseConnection.collection(connectionString);
+        return collection.upsert(documentId, document);
+    }
 
-        //We will create very simple Json document
-        final JsonObject put = JsonObject
-                .create()
-                .put("firstName", "David");
-        final MutationResult upsert = collection.upsert(id, put);
-        System.out.println("Mutation result:" );
-        System.out.println("CAS: " + upsert.cas());
-        System.out.println("Token: " + upsert.mutationToken());
+    public static Mono<MutationResult> reactiveUpsert(String connectionString, String documentId, JsonObject document){
+        final ReactiveCollection reactiveCollection = CouchbaseConnection.reactiveCollection(connectionString);
+        return reactiveCollection.upsert(documentId, document);
+
     }
 }

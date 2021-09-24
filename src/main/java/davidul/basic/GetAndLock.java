@@ -9,12 +9,13 @@ import java.time.Duration;
 
 public class GetAndLock {
 
-    public GetResult getAndLock(String connectionString, String id){
+    public static GetResult getAndLock(String connectionString, String id){
         final Collection collection = CouchbaseConnection.collection(connectionString);
+
         return collection.getAndLock(id, Duration.ofSeconds(20));
     }
 
-    public Mono<GetResult> getAndLockReactive(String connectionString, String id){
+    public static Mono<GetResult> getAndLockReactive(String connectionString, String id){
         final ReactiveCollection reactive = CouchbaseConnection.collection(connectionString).reactive();
         return reactive.getAndLock(id, Duration.ofSeconds(20));
     }
