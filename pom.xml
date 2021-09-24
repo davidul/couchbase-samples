@@ -145,6 +145,13 @@
             <artifactId>debezium-core</artifactId>
             <version>1.4.0.Alpha2</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.11</version>
+        </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -154,7 +161,7 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>couchbase</artifactId>
-            <version>1.15.0-rc2</version>
+            <version>1.16.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
