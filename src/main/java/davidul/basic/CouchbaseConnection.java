@@ -19,8 +19,8 @@ public class CouchbaseConnection {
     private static final String bucketName = "default";
     public static final String defaultUsername = "Administrator";
     public static final String defaultPassword = "password";
-    private static Cluster cluster;
 
+    private static Cluster cluster;
     private static ReactiveCluster reactiveCluster;
 
     /**

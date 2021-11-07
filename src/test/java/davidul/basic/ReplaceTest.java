@@ -2,13 +2,14 @@ package davidul.basic;
 
 import com.couchbase.client.core.error.DocumentNotFoundException;
 import com.couchbase.client.java.json.JsonObject;
+import com.couchbase.client.java.kv.MutationResult;
 import davidul.ContainerSetup;
 import davidul.basic.sampledata.SampleData;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static davidul.basic.Replace.replace;
-import static davidul.basic.Upsert.upsert;
+import static davidul.basic.mutation.Replace.replace;
+import static davidul.basic.mutation.Upsert.upsert;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ReplaceTest {
@@ -20,7 +21,7 @@ public class ReplaceTest {
     @BeforeClass
     public static void setup() {
         connectionString = ContainerSetup.setup();
-        upsert(connectionString, ID_1);
+        upsert(connectionString, ID_1, SampleData.sample());
     }
 
     @Test(expected = DocumentNotFoundException.class)
@@ -34,11 +35,12 @@ public class ReplaceTest {
                 .collection(connectionString)
                 .get(ID_1)
                 .contentAsObject();
+
         final JsonObject newData = SampleData
                 .sample()
                 .put("Update", "Value");
 
-        replace(connectionString, ID_1, newData);
+        final MutationResult mutationResult = replace(connectionString, ID_1, newData);
 
         final JsonObject replacedData = CouchbaseConnection
                 .collection(connectionString)
@@ -46,5 +48,6 @@ public class ReplaceTest {
                 .contentAsObject();
 
         assertThat(replacedData.get("Update")).isEqualTo("Value");
+        assertThat(mutationResult).isNotNull();
     }
 }

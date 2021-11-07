@@ -38,6 +38,11 @@ public class DocumentUpdater extends AbstractVerticle {
     private static final Logger LOGGER = LoggerFactory.getLogger(DocumentUpdater.class);
     private List<EventListener<DocumentWrapper>> registeredListeners;
 
+    /**
+     * Verticle start method
+     *
+     * @throws Exception
+     */
     @Override
     public void start() throws Exception {
         registeredListeners = new ArrayList<>();
@@ -71,7 +76,12 @@ public class DocumentUpdater extends AbstractVerticle {
 
 
     }
-    
+
+    /**
+     * Update document
+     *
+     * @param documentWrapper
+     */
     public void update(DocumentWrapper documentWrapper){
         final Collection collection = CouchbaseConnection.collection(Main.CONNECTION_STRING);
         try {
@@ -84,6 +94,7 @@ public class DocumentUpdater extends AbstractVerticle {
                 }
             }
         }catch (DocumentNotFoundException e){
+            //Document does not exist, upsert it
             collection.upsert(documentWrapper.getDocumentId(), documentWrapper);
             LOGGER.info("++++++++++++++++++++++++++++++++++++++++++++++");
             LOGGER.info("Document upserted");

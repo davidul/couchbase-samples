@@ -1,7 +1,8 @@
-package davidul.basic;
+package davidul.basic.mutation;
 
 import com.couchbase.client.java.json.JsonObject;
 import com.couchbase.client.java.kv.MutationResult;
+import davidul.basic.CouchbaseConnection;
 import reactor.core.publisher.Mono;
 
 public class Upsert {

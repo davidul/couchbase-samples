@@ -9,8 +9,8 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static davidul.basic.Upsert.reactiveUpsert;
-import static davidul.basic.Upsert.upsert;
+import static davidul.basic.mutation.Upsert.reactiveUpsert;
+import static davidul.basic.mutation.Upsert.upsert;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class UpsertTest {

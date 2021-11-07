@@ -12,7 +12,7 @@ import reactor.test.StepVerifier;
 
 import static davidul.basic.GetAndLock.getAndLock;
 import static davidul.basic.GetAndLock.getAndLockReactive;
-import static davidul.basic.Upsert.upsert;
+import static davidul.basic.mutation.Upsert.upsert;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class GetAndLockTest {
@@ -24,8 +24,8 @@ public class GetAndLockTest {
     @BeforeClass
     public static void setup(){
         connectionString = ContainerSetup.setup();
-        upsert(connectionString, ID_1);
-        upsert(connectionString, ID_2);
+        upsert(connectionString, ID_1, SampleData.sample());
+        upsert(connectionString, ID_2, SampleData.sample());
     }
 
     @Test
