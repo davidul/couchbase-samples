@@ -1,6 +1,7 @@
 package davidul.online.basic;
 
 import com.couchbase.client.core.cnc.EventBus;
+import davidul.online.connection.SimpleCouchbaseConnection;
 
 /**
  * @author ulicny.david@gmail.com

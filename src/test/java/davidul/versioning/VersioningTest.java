@@ -5,7 +5,7 @@ import com.couchbase.client.java.json.JsonObject;
 import com.couchbase.client.java.kv.GetResult;
 import com.couchbase.client.java.kv.MutationResult;
 import davidul.ContainerSetup;
-import davidul.online.basic.SimpleCouchbaseConnection;
+import davidul.online.connection.SimpleCouchbaseConnection;
 import org.assertj.core.api.Assertions;
 import org.junit.BeforeClass;
 import org.junit.Test;

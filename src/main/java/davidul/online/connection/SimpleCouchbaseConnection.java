@@ -1,4 +1,4 @@
-package davidul.online.basic;
+package davidul.online.connection;
 
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;

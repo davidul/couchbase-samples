@@ -8,7 +8,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
-import static davidul.online.basic.SimpleCouchbaseConnection.defaultCollection;
+import static davidul.online.connection.SimpleCouchbaseConnection.defaultCollection;
 
 /**
  * Simple GET from couchbase
