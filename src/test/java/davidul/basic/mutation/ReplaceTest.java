@@ -1,9 +1,10 @@
-package davidul.basic;
+package davidul.basic.mutation;
 
 import com.couchbase.client.core.error.DocumentNotFoundException;
 import com.couchbase.client.java.json.JsonObject;
 import com.couchbase.client.java.kv.MutationResult;
 import davidul.ContainerSetup;
+import davidul.basic.CouchbaseConnection;
 import davidul.basic.sampledata.SampleData;
 import org.junit.BeforeClass;
 import org.junit.Test;
