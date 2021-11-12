@@ -12,6 +12,7 @@ import com.couchbase.transactions.TransactionResult;
 import com.couchbase.transactions.Transactions;
 import davidul.ContainerSetup;
 import davidul.online.basic.sampledata.SampleType;
+import davidul.online.connection.SimpleCouchbaseConnection;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import reactor.test.StepVerifier;

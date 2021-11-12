@@ -5,6 +5,7 @@ import com.couchbase.client.java.Collection;
 import com.couchbase.client.java.kv.GetResult;
 import davidul.ContainerSetup;
 import davidul.online.basic.sampledata.SampleData;
+import davidul.online.connection.SimpleCouchbaseConnection;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import reactor.core.publisher.Mono;

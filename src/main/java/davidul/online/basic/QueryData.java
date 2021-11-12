@@ -2,6 +2,7 @@ package davidul.online.basic;
 
 import com.couchbase.client.java.json.JsonObject;
 import com.couchbase.client.java.query.QueryResult;
+import davidul.online.connection.SimpleCouchbaseConnection;
 
 import java.util.List;
 

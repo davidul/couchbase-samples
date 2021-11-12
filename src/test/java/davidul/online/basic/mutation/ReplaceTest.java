@@ -4,7 +4,7 @@ import com.couchbase.client.core.error.DocumentNotFoundException;
 import com.couchbase.client.java.json.JsonObject;
 import com.couchbase.client.java.kv.MutationResult;
 import davidul.ContainerSetup;
-import davidul.online.basic.SimpleCouchbaseConnection;
+import davidul.online.connection.SimpleCouchbaseConnection;
 import davidul.online.basic.sampledata.SampleData;
 import org.junit.BeforeClass;
 import org.junit.Test;
