@@ -3,7 +3,7 @@ package davidul.online.complex;
 import com.couchbase.client.java.Collection;
 import com.couchbase.client.java.json.JsonObject;
 import com.github.javafaker.Faker;
-import davidul.online.basic.SimpleCouchbaseConnection;
+import davidul.online.connection.SimpleCouchbaseConnection;
 import davidul.online.complex.document.DocumentWrapper;
 import davidul.online.complex.document.TrekMessage;
 import davidul.online.complex.kafka.Consumer;

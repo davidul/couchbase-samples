@@ -3,7 +3,7 @@ package davidul.online.basic.mutation;
 import com.couchbase.client.core.error.DocumentExistsException;
 import com.couchbase.client.java.kv.MutationResult;
 import davidul.ContainerSetup;
-import davidul.online.basic.SimpleCouchbaseConnection;
+import davidul.online.connection.SimpleCouchbaseConnection;
 import davidul.online.basic.sampledata.SampleData;
 import org.assertj.core.api.Assertions;
 import org.junit.BeforeClass;

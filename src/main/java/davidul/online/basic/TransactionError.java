@@ -6,9 +6,10 @@ import com.couchbase.transactions.TransactionGetResult;
 import com.couchbase.transactions.TransactionResult;
 import com.couchbase.transactions.Transactions;
 import com.couchbase.transactions.error.TransactionFailed;
+import davidul.online.connection.SimpleCouchbaseConnection;
 
 import static com.couchbase.transactions.Transactions.create;
-import static davidul.online.basic.SimpleCouchbaseConnection.cluster;
+import static davidul.online.connection.SimpleCouchbaseConnection.cluster;
 
 public class TransactionError {
 

@@ -1,6 +1,6 @@
 package davidul;
 
-import davidul.online.basic.SimpleCouchbaseConnection;
+import davidul.online.connection.SimpleCouchbaseConnection;
 import org.testcontainers.couchbase.BucketDefinition;
 import org.testcontainers.couchbase.CouchbaseContainer;
 import org.testcontainers.couchbase.CouchbaseService;

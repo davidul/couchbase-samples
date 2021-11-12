@@ -1,6 +1,7 @@
 package davidul.online.basic;
 
 import com.couchbase.client.java.kv.GetResult;
+import davidul.online.connection.SimpleCouchbaseConnection;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;

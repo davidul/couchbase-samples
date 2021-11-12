@@ -10,7 +10,7 @@ import com.couchbase.transactions.TransactionDurabilityLevel;
 import com.couchbase.transactions.Transactions;
 import com.couchbase.transactions.config.TransactionConfigBuilder;
 import com.couchbase.transactions.error.TransactionFailed;
-import davidul.online.basic.SimpleCouchbaseConnection;
+import davidul.online.connection.SimpleCouchbaseConnection;
 import davidul.online.complex.document.Counter;
 import davidul.online.complex.document.DocumentWrapper;
 import davidul.online.complex.kafka.Publisher;

@@ -5,7 +5,7 @@ import davidul.ContainerSetup;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static davidul.online.basic.SimpleCouchbaseConnection.defaultCollection;
+import static davidul.online.connection.SimpleCouchbaseConnection.defaultCollection;
 
 public class TransactionErrorTest {
     private static String connectionString;
