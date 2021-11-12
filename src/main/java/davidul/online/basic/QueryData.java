@@ -13,7 +13,7 @@ import java.util.List;
 public class QueryData {
 
     public static List<JsonObject> query(String[] args) {
-        final QueryResult query = CouchbaseConnection.cluster().query("select * from `default` d where META(d).id='ID::1'");
+        final QueryResult query = SimpleCouchbaseConnection.cluster().query("select * from `default` d where META(d).id='ID::1'");
         return query.rowsAsObject();
 
     }

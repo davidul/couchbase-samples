@@ -7,7 +7,7 @@ import com.couchbase.client.java.kv.GetResult;
 import com.couchbase.client.java.kv.MutationResult;
 import com.couchbase.transactions.TransactionGetResult;
 import com.couchbase.transactions.Transactions;
-import davidul.online.basic.CouchbaseConnection;
+import davidul.online.basic.SimpleCouchbaseConnection;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
@@ -19,23 +19,23 @@ public class Versioning {
     private static final String VERSION = "version";
 
     public void read(String key) {
-        final Collection collection = CouchbaseConnection.collection();
+        final Collection collection = SimpleCouchbaseConnection.collection();
         final GetResult result = collection.get(key);
         final JsonObject jsonObject = result.contentAsObject();
         final String version = (String) jsonObject.get(VERSION);
     }
 
     public void swap(String key, JsonObject newVersion) {
-        final Cluster cluster = CouchbaseConnection.cluster();
+        final Cluster cluster = SimpleCouchbaseConnection.cluster();
         Transactions transactions = Transactions.create(cluster);
 
         transactions.run(ctx -> {
-            final Collection collection = CouchbaseConnection.collection();
+            final Collection collection = SimpleCouchbaseConnection.collection();
             final TransactionGetResult transactionGetResult = ctx.get(collection, key);
         });
 
         transactions.run(ctx -> {
-            final Collection collection = CouchbaseConnection.collection();
+            final Collection collection = SimpleCouchbaseConnection.collection();
 
             final Optional<TransactionGetResult> transactionGetResult = ctx.getOptional(collection, key);
 

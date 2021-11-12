@@ -5,7 +5,7 @@ import com.couchbase.client.java.json.JsonObject;
 import com.couchbase.client.java.kv.GetResult;
 import com.couchbase.client.java.kv.MutationResult;
 import davidul.ContainerSetup;
-import davidul.online.basic.CouchbaseConnection;
+import davidul.online.basic.SimpleCouchbaseConnection;
 import org.assertj.core.api.Assertions;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -29,7 +29,7 @@ public class VersioningTest {
                 "--cluster-ramsize 512 n" +
                 "--cluster-index-ramsize 256";
 
-        final Collection collection = CouchbaseConnection.collection(connectionString);
+        final Collection collection = SimpleCouchbaseConnection.defaultCollection(connectionString);
         if(collection.exists(id).exists())
             collection.remove(id);
 
@@ -47,7 +47,7 @@ public class VersioningTest {
 
     //@Test
     public void swap_fail(){
-        final Collection collection = CouchbaseConnection.collection(connectionString);
+        final Collection collection = SimpleCouchbaseConnection.defaultCollection(connectionString);
         if(collection.exists(id).exists())
             collection.remove(id);
 

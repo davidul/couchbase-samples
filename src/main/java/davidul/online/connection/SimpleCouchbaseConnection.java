@@ -14,7 +14,7 @@ import com.couchbase.client.java.codec.JsonTranscoder;
  *
  * @author ulicny.david@gmail.com
  */
-public class CouchbaseConnection {
+public class SimpleCouchbaseConnection {
 
     private static final String bucketName = "default";
     public static final String defaultUsername = "Administrator";
@@ -36,14 +36,19 @@ public class CouchbaseConnection {
         return bucket.defaultCollection();
     }
 
-    public static Collection collection(String connectionString){
+    public static Collection collection(String connectionString, String collectionName){
         // Initialize the Connection
         cluster(connectionString);
         Bucket bucket = cluster.bucket(bucketName);
         // get a collection reference
-        return bucket.defaultCollection();
+        return bucket.collection(collectionName);
     }
 
+    public static Collection defaultCollection(String connectionString){
+        cluster(connectionString);
+        Bucket bucket = cluster.bucket(bucketName);
+        return bucket.defaultCollection();
+    }
 
     /**
      * Local cluster, with default username and password

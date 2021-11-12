@@ -18,8 +18,8 @@ public class GetAndLock {
      * @return
      */
     public static GetResult getAndLock(String connectionString, String id){
-        return CouchbaseConnection
-                .collection(connectionString)
+        return SimpleCouchbaseConnection
+                .defaultCollection(connectionString)
                 .getAndLock(id, Duration.ofSeconds(20));
     }
 
@@ -30,8 +30,8 @@ public class GetAndLock {
      * @return Mono
      */
     public static Mono<GetResult> getAndLockReactive(String connectionString, String id){
-        return CouchbaseConnection
-                .collection(connectionString)
+        return SimpleCouchbaseConnection
+                .defaultCollection(connectionString)
                 .reactive()
                 .getAndLock(id, Duration.ofSeconds(20));
     }

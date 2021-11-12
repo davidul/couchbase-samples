@@ -5,7 +5,7 @@ import davidul.ContainerSetup;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static davidul.online.basic.CouchbaseConnection.collection;
+import static davidul.online.basic.SimpleCouchbaseConnection.defaultCollection;
 
 public class TransactionErrorTest {
     private static String connectionString;
@@ -19,7 +19,7 @@ public class TransactionErrorTest {
     public void error(){
         final TransactionError transactionError = new TransactionError();
         transactionError.findKey("SOME", connectionString);
-        final GetResult result = collection(connectionString).get("SOME::1");
+        final GetResult result = defaultCollection(connectionString).get("SOME::1");
         System.out.println(result);
     }
 

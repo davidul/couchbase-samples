@@ -9,7 +9,7 @@ import com.couchbase.transactions.TransactionDurabilityLevel;
 import com.couchbase.transactions.TransactionResult;
 import com.couchbase.transactions.Transactions;
 import com.couchbase.transactions.config.TransactionConfigBuilder;
-import davidul.online.basic.CouchbaseConnection;
+import davidul.online.basic.SimpleCouchbaseConnection;
 import davidul.online.complex.document.Counter;
 import davidul.online.complex.document.DocumentWrapper;
 import davidul.online.complex.kafka.Publisher;
@@ -35,7 +35,7 @@ public class CounterUpdaterTrx extends AbstractVerticle {
     public static final String ADDRESS = CounterUpdaterTrx.class.getName();
     private static final Logger LOGGER = LoggerFactory.getLogger(CounterUpdaterTrx.class);
 
-    final Transactions tx = Transactions.create(CouchbaseConnection.cluster(Main.CONNECTION_STRING), TransactionConfigBuilder.create()
+    final Transactions tx = Transactions.create(SimpleCouchbaseConnection.cluster(Main.CONNECTION_STRING), TransactionConfigBuilder.create()
             .durabilityLevel(TransactionDurabilityLevel.PERSIST_TO_MAJORITY)
             .logOnFailure(true, Event.Severity.WARN)
             .build());
@@ -63,7 +63,7 @@ public class CounterUpdaterTrx extends AbstractVerticle {
     public void updateCounter(final String counterName,
                               final String connectionString,
                               DocumentWrapper documentWrapper) {
-        final Collection collection = CouchbaseConnection.collection(connectionString);
+        final Collection collection = SimpleCouchbaseConnection.defaultCollection(connectionString);
 
         final GetResult result = collection.get(documentWrapper.getDocumentId());
         if (result.cas() == -1) {

@@ -8,7 +8,7 @@ import com.couchbase.transactions.Transactions;
 import com.couchbase.transactions.error.TransactionFailed;
 
 import static com.couchbase.transactions.Transactions.create;
-import static davidul.online.basic.CouchbaseConnection.cluster;
+import static davidul.online.basic.SimpleCouchbaseConnection.cluster;
 
 public class TransactionError {
 
@@ -17,8 +17,8 @@ public class TransactionError {
         final Transactions transactions = create(cluster);
         try {
             transactions.run(ctx -> {
-                ctx.insert(CouchbaseConnection.collection(connectionString), "SOME::1", JsonObject.create().put("some", "value"));
-                final TransactionGetResult transactionGetResult = ctx.get(CouchbaseConnection.collection(connectionString), key);
+                ctx.insert(SimpleCouchbaseConnection.defaultCollection(connectionString), "SOME::1", JsonObject.create().put("some", "value"));
+                final TransactionGetResult transactionGetResult = ctx.get(SimpleCouchbaseConnection.defaultCollection(connectionString), key);
                 ctx.commit();
             });
         } catch (TransactionFailed transactionFailed) {
@@ -31,7 +31,7 @@ public class TransactionError {
     public void findKeyReactive(String key, String connectionString) {
         create(cluster(connectionString))
                 .reactive()
-                .run(ctx -> ctx.get(CouchbaseConnection.collection(connectionString).reactive(), key)
+                .run(ctx -> ctx.get(SimpleCouchbaseConnection.defaultCollection(connectionString).reactive(), key)
             .then(ctx.commit()))
                 .doOnError(c -> System.err.println(c.getCause()));
 
