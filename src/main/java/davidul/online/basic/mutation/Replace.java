@@ -2,7 +2,7 @@ package davidul.online.basic.mutation;
 
 import com.couchbase.client.java.json.JsonObject;
 import com.couchbase.client.java.kv.MutationResult;
-import davidul.online.basic.CouchbaseConnection;
+import davidul.online.basic.SimpleCouchbaseConnection;
 
 /**
  * Replaces the document.
@@ -11,8 +11,8 @@ import davidul.online.basic.CouchbaseConnection;
 public class Replace {
 
     public static MutationResult replace(String connectionString, String documentId, JsonObject document) {
-        return CouchbaseConnection
-                .collection(connectionString)
+        return SimpleCouchbaseConnection
+                .defaultCollection(connectionString)
                 .replace(documentId, document);
     }
 }

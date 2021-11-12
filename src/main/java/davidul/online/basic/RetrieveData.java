@@ -8,7 +8,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
-import static davidul.online.basic.CouchbaseConnection.collection;
+import static davidul.online.basic.SimpleCouchbaseConnection.defaultCollection;
 
 /**
  * Simple GET from couchbase
@@ -18,7 +18,7 @@ import static davidul.online.basic.CouchbaseConnection.collection;
 public class RetrieveData {
 
     public static Optional<GetResult> retrieveIfExist(String connectionString, String documentId) {
-        final Collection collection = collection(connectionString);
+        final Collection collection = defaultCollection(connectionString);
 
         final ExistsResult exists = collection.exists(documentId);
         if (exists.exists()) {
@@ -28,13 +28,13 @@ public class RetrieveData {
     }
 
     public static JsonObject retrieve(String connectionString, String documentId) {
-        return collection(connectionString)
+        return defaultCollection(connectionString)
                 .get(documentId)
                 .contentAsObject();
     }
 
     public static Mono<JsonObject> retrieveReactive(String connectionString, String documentId) {
-        return collection(connectionString)
+        return defaultCollection(connectionString)
                 .reactive()
                 .get(documentId)
                 .map(GetResult::contentAsObject);

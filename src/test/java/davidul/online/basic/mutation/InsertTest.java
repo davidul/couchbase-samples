@@ -1,7 +1,11 @@
 package davidul.online.basic.mutation;
 
+import com.couchbase.client.core.error.DocumentExistsException;
+import com.couchbase.client.java.kv.MutationResult;
 import davidul.ContainerSetup;
+import davidul.online.basic.SimpleCouchbaseConnection;
 import davidul.online.basic.sampledata.SampleData;
+import org.assertj.core.api.Assertions;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -15,13 +19,19 @@ public class InsertTest {
 
     @BeforeClass
     public static void setup() {
-        connectionString = ContainerSetup.setup_1();
-        //connectionString = ContainerSetup.setup();
+        connectionString = ContainerSetup.setup();
         upsert(connectionString, ID_1, SampleData.sample());
     }
 
     @Test
     public void insert(){
-        Insert.insert(ID_2, SampleData.sample());
+        MutationResult insert = Insert.insert(connectionString, ID_2, SampleData.sample());
+        long cas = insert.cas();
+        Assertions.assertThat(SimpleCouchbaseConnection.collection().get(ID_2).cas()).isEqualTo(cas);
+    }
+
+    @Test(expected = DocumentExistsException.class)
+    public void insert_failed(){
+        MutationResult insert = Insert.insert(connectionString,ID_1, SampleData.sample());
     }
 }

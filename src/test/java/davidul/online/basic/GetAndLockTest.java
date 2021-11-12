@@ -32,7 +32,7 @@ public class GetAndLockTest {
     public void _1(){
         final GetResult andLock = getAndLock(connectionString, ID_1);
 
-        final Collection collection = CouchbaseConnection.collection(connectionString);
+        final Collection collection = SimpleCouchbaseConnection.defaultCollection(connectionString);
         final GetResult result = collection.get(ID_1);
 
         //data are locked, cas == -1

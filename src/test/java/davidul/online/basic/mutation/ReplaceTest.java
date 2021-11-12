@@ -4,7 +4,7 @@ import com.couchbase.client.core.error.DocumentNotFoundException;
 import com.couchbase.client.java.json.JsonObject;
 import com.couchbase.client.java.kv.MutationResult;
 import davidul.ContainerSetup;
-import davidul.online.basic.CouchbaseConnection;
+import davidul.online.basic.SimpleCouchbaseConnection;
 import davidul.online.basic.sampledata.SampleData;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -32,8 +32,8 @@ public class ReplaceTest {
 
     @Test
     public void test_replace(){
-        final JsonObject oldData = CouchbaseConnection
-                .collection(connectionString)
+        final JsonObject oldData = SimpleCouchbaseConnection
+                .defaultCollection(connectionString)
                 .get(ID_1)
                 .contentAsObject();
 
@@ -43,8 +43,8 @@ public class ReplaceTest {
 
         final MutationResult mutationResult = replace(connectionString, ID_1, newData);
 
-        final JsonObject replacedData = CouchbaseConnection
-                .collection(connectionString)
+        final JsonObject replacedData = SimpleCouchbaseConnection
+                .defaultCollection(connectionString)
                 .get(ID_1)
                 .contentAsObject();
 
