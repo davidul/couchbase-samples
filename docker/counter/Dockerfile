@@ -3,7 +3,7 @@ FROM vertx/vertx3
 
 ENV VERTICLE_JAR couchbase-samples-1.0-SNAPSHOT-fat.jar
 ENV VERTICLE_HOME /usr/verticles
-ENV VERTICLE_NAME davidul.complex.Main
+ENV VERTICLE_NAME davidul.online.complex.Main
 
 EXPOSE 8080 7896
 
