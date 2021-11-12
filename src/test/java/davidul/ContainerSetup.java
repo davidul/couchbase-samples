@@ -18,4 +18,20 @@ public class ContainerSetup {
         return couchbaseContainer.getConnectionString();
     }
 
+    public static String setup_1(){
+        BucketDefinition aDefault = new BucketDefinition("default");
+        CouchbaseContainer cb1 = new CouchbaseContainer(DockerImageName.parse("couchbase:7.0.2").asCompatibleSubstituteFor("couchbase/server"))
+                .withBucket(aDefault)
+                .withCredentials("Administrator", "password");
+        CouchbaseContainer cb2 = new CouchbaseContainer(DockerImageName.parse("couchbase:7.0.2").asCompatibleSubstituteFor("couchbase/server"))
+                .withBucket(aDefault)
+                .withCredentials("Administrator", "password")
+                ;
+        //DockerImageName.parse();
+
+        cb1.start();
+        //cb2.start();
+        return cb1.getConnectionString();//+ " " + cb2.getConnectionString();
+    }
+
 }
