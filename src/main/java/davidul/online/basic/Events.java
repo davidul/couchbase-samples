@@ -8,7 +8,7 @@ import com.couchbase.client.core.cnc.EventBus;
 public class Events {
 
     public static void main(String[] args) {
-        final EventBus eventBus = CouchbaseConnection.cluster().environment().eventBus();
+        final EventBus eventBus = SimpleCouchbaseConnection.cluster().environment().eventBus();
         eventBus.subscribe(System.out::println);
     }
 }

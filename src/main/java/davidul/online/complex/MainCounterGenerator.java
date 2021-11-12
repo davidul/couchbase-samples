@@ -6,7 +6,7 @@ import com.couchbase.transactions.TransactionDurabilityLevel;
 import com.couchbase.transactions.Transactions;
 import com.couchbase.transactions.config.TransactionConfigBuilder;
 import com.github.javafaker.Faker;
-import davidul.online.basic.CouchbaseConnection;
+import davidul.online.basic.SimpleCouchbaseConnection;
 import davidul.online.complex.document.Counter;
 import davidul.online.complex.document.DocumentWrapper;
 import davidul.online.complex.document.TrekMessage;
@@ -33,7 +33,7 @@ public class MainCounterGenerator extends AbstractVerticle {
     private static final Logger LOGGER = LoggerFactory.getLogger(MainCounterGenerator.class);
 
 
-    final Transactions tx = Transactions.create(CouchbaseConnection.cluster(Main.CONNECTION_STRING),
+    final Transactions tx = Transactions.create(SimpleCouchbaseConnection.cluster(Main.CONNECTION_STRING),
             TransactionConfigBuilder.create()
                     .durabilityLevel(TransactionDurabilityLevel.PERSIST_TO_MAJORITY)
                     .logOnFailure(true, Event.Severity.WARN)
@@ -105,7 +105,7 @@ public class MainCounterGenerator extends AbstractVerticle {
     }
 
     public void lockAndUpdate(DocumentWrapper inputDocument){
-        final Collection collection = CouchbaseConnection.collection(Main.CONNECTION_STRING);
+        final Collection collection = SimpleCouchbaseConnection.defaultCollection(Main.CONNECTION_STRING);
             inputDocument.addCounter(new Counter(this.getClass().getName(), 0));
             tx.reactive().run(ctx -> {
                         return ctx

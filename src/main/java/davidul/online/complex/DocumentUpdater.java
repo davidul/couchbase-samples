@@ -10,7 +10,7 @@ import com.couchbase.transactions.TransactionDurabilityLevel;
 import com.couchbase.transactions.Transactions;
 import com.couchbase.transactions.config.TransactionConfigBuilder;
 import com.couchbase.transactions.error.TransactionFailed;
-import davidul.online.basic.CouchbaseConnection;
+import davidul.online.basic.SimpleCouchbaseConnection;
 import davidul.online.complex.document.Counter;
 import davidul.online.complex.document.DocumentWrapper;
 import davidul.online.complex.kafka.Publisher;
@@ -28,7 +28,7 @@ import java.util.List;
 
 public class DocumentUpdater extends AbstractVerticle {
 
-    final Transactions tx = Transactions.create(CouchbaseConnection.cluster(Main.CONNECTION_STRING),
+    final Transactions tx = Transactions.create(SimpleCouchbaseConnection.cluster(Main.CONNECTION_STRING),
             TransactionConfigBuilder.create()
                     .durabilityLevel(TransactionDurabilityLevel.PERSIST_TO_MAJORITY)
                     .logOnFailure(true, Event.Severity.WARN)
@@ -83,7 +83,7 @@ public class DocumentUpdater extends AbstractVerticle {
      * @param documentWrapper
      */
     public void update(DocumentWrapper documentWrapper){
-        final Collection collection = CouchbaseConnection.collection(Main.CONNECTION_STRING);
+        final Collection collection = SimpleCouchbaseConnection.defaultCollection(Main.CONNECTION_STRING);
         try {
             final GetResult getResult = collection.get(documentWrapper.getDocumentId());
             if (getResult.cas() == -1) {

@@ -49,18 +49,18 @@ public class RetrieveDataTest {
 
     @Test
     public void sample_retrieve_in_tx() {
-        final Cluster cluster = CouchbaseConnection.cluster(connectionString);
+        final Cluster cluster = SimpleCouchbaseConnection.cluster(connectionString);
         final Transactions transactions = Transactions.create(cluster);
         final TransactionResult run = transactions.run(ctx -> {
-            final TransactionGetResult transactionGetResult = ctx.get(CouchbaseConnection.collection(connectionString), ID_1);
+            final TransactionGetResult transactionGetResult = ctx.get(SimpleCouchbaseConnection.defaultCollection(connectionString), ID_1);
         });
 
     }
 
     @Test
     public void retrieve_reactive() {
-        final GetResult getResult = CouchbaseConnection
-                .collection(connectionString)
+        final GetResult getResult = SimpleCouchbaseConnection
+                .defaultCollection(connectionString)
                 .get(ID_1);
 
         final JsonTranscoder jsonTranscoder = JsonTranscoder.create(DefaultJsonSerializer.create());
@@ -75,7 +75,7 @@ public class RetrieveDataTest {
     }
 
     public static void upsert(String id){
-        final Collection collection = CouchbaseConnection.collection(connectionString);
+        final Collection collection = SimpleCouchbaseConnection.defaultCollection(connectionString);
         collection.upsert(id, sampleData());
     }
 
