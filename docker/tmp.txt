@@ -1,0 +1,33 @@
+  db1:
+    container_name: db1
+    image: couchbase:latest
+    ports:
+      - 8091:8091
+      - 8092:8092
+      - 8093:8093
+      - 8094:8094
+      - 11210:11210
+
+  db2:
+    container_name: db2
+    image: couchbase:latest
+    ports:
+      - 18091:8091
+      - 18092:8092
+      - 18093:8093
+      - 18094:8094
+      - 21210:11210
+    depends_on:
+      - db1
+
+  db3:
+    container_name: db3
+    image: couchbase:latest
+    ports:
+      - 28091:8091
+      - 28092:8092
+      - 28093:8093
+      - 28094:8094
+      - 31210:11210
+    depends_on:
+      - db1
