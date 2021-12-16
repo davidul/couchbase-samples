@@ -31,8 +31,8 @@ services:
   db1:
     container_name: db1
     build:
-      context: ./couchbase
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: ../Dockerfile
     networks:
       couchbase-net:
         ipv4_address: 172.16.101.2
