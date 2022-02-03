@@ -2,9 +2,8 @@ package davidul.online.basic.mutation;
 
 import com.couchbase.client.core.error.DocumentExistsException;
 import com.couchbase.client.java.kv.MutationResult;
-import davidul.ContainerSetup;
-import davidul.online.connection.SimpleCouchbaseConnection;
 import davidul.online.basic.sampledata.SampleData;
+import davidul.online.connection.SimpleCouchbaseConnection;
 import org.assertj.core.api.Assertions;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -22,7 +21,8 @@ public class InsertTest {
 
     @BeforeClass
     public static void setup() {
-        connectionString = ContainerSetup.setup();
+        connectionString = "localhost";
+        //connectionString = ContainerSetup.setup();
         upsert(connectionString, ID_1, SampleData.sample());
     }
 
