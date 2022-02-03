@@ -84,9 +84,22 @@ public class SimpleCouchbaseConnection {
         return bucket.defaultCollection();
     }
 
+    public static ReactiveCollection reactiveCollection(){
+        reactiveCluster();
+        final ReactiveBucket bucket = reactiveCluster.bucket(bucketName);
+        return bucket.defaultCollection();
+    }
+
     public static ReactiveCluster reactiveCluster(String connectionString){
         if(reactiveCluster == null){
             reactiveCluster = ReactiveCluster.connect(connectionString, defaultUsername, defaultPassword);
+        }
+        return reactiveCluster;
+    }
+
+    public static ReactiveCluster reactiveCluster(){
+        if(reactiveCluster == null){
+            reactiveCluster = ReactiveCluster.connect("localhost", defaultUsername, defaultPassword);
         }
         return reactiveCluster;
     }
