@@ -1,0 +1,1 @@
+docker-compose --file ../../docker/docker-compose-cbs-only.yml up --build
