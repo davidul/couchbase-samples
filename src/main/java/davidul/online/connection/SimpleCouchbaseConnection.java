@@ -36,6 +36,11 @@ public class SimpleCouchbaseConnection {
         return bucket.defaultCollection();
     }
 
+    /**
+     * @param connectionString connection
+     * @param collectionName collection name
+     * @return {@link Collection}
+     */
     public static Collection collection(String connectionString, String collectionName){
         // Initialize the Connection
         cluster(connectionString);
@@ -44,6 +49,12 @@ public class SimpleCouchbaseConnection {
         return bucket.collection(collectionName);
     }
 
+
+    /**
+     * Default collection
+     * @param connectionString
+     * @return {@link Collection}
+     */
     public static Collection defaultCollection(String connectionString){
         cluster(connectionString);
         Bucket bucket = cluster.bucket(bucketName);
