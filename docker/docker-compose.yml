@@ -18,7 +18,7 @@ services:
       context: ./couchbase
       dockerfile: Dockerfile
     environment:
-      MASTER: master:8091
+      MASTER: master
     ports:
       - 8091
       - 8092
