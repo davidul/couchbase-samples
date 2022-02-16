@@ -24,12 +24,46 @@ until [[ $(check_db) = 0 ]]; do
   sleep 1
 done
 
-log "Init cluster"
-couchbase-cli node-init -c 127.0.0.1 -u Administrator -p password
-couchbase-cli cluster-init -c 127.0.0.1 --cluster-username Administrator --cluster-password password --services data,index,query --cluster-ramsize 2048 --cluster-index-ramsize 1024 --cluster-eventing-ramsize 512 --index-storage-setting default
-couchbase-cli server-add -c 127.0.0.1:8091 --username Administrator --password password --server-add http://172.16.101.3:8091 --server-add-username Administrator --server-add-password password --services data,index,query
-couchbase-cli server-add -c 127.0.0.1:8091 --username Administrator --password password --server-add http://172.16.101.4:8091 --server-add-username Administrator --server-add-password password --services data,index,query
-couchbase-cli rebalance -c 127.0.0.1:8091 --username Administrator --password password
-couchbase-cli bucket-create -c 127.0.0.1 --username Administrator --password password --bucket default --bucket-type couchbase --bucket-ramsize 1024
+log "Init node"
+couchbase-cli node-init -c ${HOSTNAME} -u Administrator -p password
+
+if [ -z "$MASTER" ]
+ then
+   log "Init cluster"
+    couchbase-cli cluster-init -c ${HOSTNAME} --cluster-username Administrator \
+      --cluster-password password --services data,index,query \
+      --cluster-ramsize 512 \
+      --cluster-index-ramsize 512 \
+      --cluster-eventing-ramsize 512 \
+      --index-storage-setting default
+fi
+
+#if [ ! -z "$MASTER" ]
+#  then
+#  couchbase-cli server-add -c ${MASTER} \
+#     --username Administrator \
+#     --password password \
+#     --server-add http://${HOSTNAME}:8091 \
+#     --server-add-username Administrator \
+#     --server-add-password password \
+#     --services data,index,query
+#
+#  couchbase-cli rebalance -c ${HOSTNAME}:8091 --username Administrator --password password
+#fi
+
+#couchbase-cli server-add -c 127.0.0.1:8091 --username Administrator --password password --server-add http://172.16.101.4:8091 --server-add-username Administrator --server-add-password password --services data,index,query
+
+
+if [ -z "$MASTER" ]
+then
+  log "Create bucket"
+couchbase-cli bucket-create \
+  -c ${HOSTNAME} \
+  --username Administrator \
+  --password password \
+  --bucket default \
+  --bucket-type couchbase \
+  --bucket-ramsize 128
+fi
 
 fg 1

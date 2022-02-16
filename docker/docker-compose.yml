@@ -1,84 +1,64 @@
 version: "3"
 services:
-  db2:
-    container_name: db2
-    image: couchbase:latest
-    networks:
-      couchbase-net:
-        ipv4_address: 172.16.101.3
-    ports:
-      - 18091:8091
-      - 18092:8092
-      - 18093:8093
-      - 18094:8094
-      - 21210:11210
-
-  db3:
-    container_name: db3
-    image: couchbase:latest
-    networks:
-      couchbase-net:
-        ipv4_address: 172.16.101.4
-    ports:
-      - 28091:8091
-      - 28092:8092
-      - 28093:8093
-      - 28094:8094
-      - 31210:11210
-    depends_on:
-      - db2
-
-  db1:
-    container_name: db1
+  master:
+    platform: linux/amd64
     build:
       context: ./couchbase
       dockerfile: Dockerfile
-    networks:
-      couchbase-net:
-        ipv4_address: 172.16.101.2
     ports:
-      - 8091:8091
-      - 8092:8092
-      - 8093:8093
-      - 8094:8094
-      - 11210:11210
-    depends_on:
-      - db2
-      - db3
+      - 8091
+      - 8092
+      - 8093
+      - 8094
+      - 11210
 
-  zookeeper:
-    container_name: zookeeper
-    image: zookeeper
-    networks:
-      couchbase-net:
-        ipv4_address: 172.16.101.5
-    depends_on:
-      - db3
-
-  kafka:
-    container_name: kafka
+  worker:
+    platform: linux/amd64
     build:
-      context: ./kafka
+      context: ./couchbase
       dockerfile: Dockerfile
-    networks:
-      couchbase-net:
-        ipv4_address: 172.16.101.6
-    depends_on:
-      - zookeeper
-
-  vertx:
-    container_name: vertx
-    build:
-      context: ./counter
-      dockerfile: Dockerfile
-    networks:
-      couchbase-net:
-        ipv4_address: 172.16.101.7
+    environment:
+      MASTER: master:8091
     ports:
-      - 7896:7896
-    depends_on:
-      - kafka
-      - db3
+      - 8091
+      - 8092
+      - 8093
+      - 8094
+      - 11210
+
+#  zookeeper:
+#    container_name: zookeeper
+#    image: zookeeper
+#    networks:
+#      couchbase-net:
+#        ipv4_address: 172.16.101.5
+#    depends_on:
+#      - db3
+
+#  kafka:
+#    container_name: kafka
+#    build:
+#      context: ./kafka
+#      dockerfile: Dockerfile
+#    networks:
+#      couchbase-net:
+#        ipv4_address: 172.16.101.6
+#    depends_on:
+#      - zookeeper
+
+#  vertx:
+#    container_name: vertx
+#    build:
+#      context: ./counter
+#      dockerfile: Dockerfile
+#    networks:
+#      couchbase-net:
+#        ipv4_address: 172.16.101.7
+#    ports:
+#      - 7896:7896
+#    depends_on:
+#      - kafka
+#      - db3
 
 networks:
   couchbase-net:
