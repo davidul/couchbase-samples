@@ -1,4 +1,4 @@
-FROM couchbase:community-7.0.2
+FROM couchbase:community-7.1.0
 
 COPY cluster-init.sh /
 
