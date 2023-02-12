@@ -1,3 +1,23 @@
+# Organization
+In `automation` are few scripts which can help setup things.
+Although they are not necessary and everything can be done manually.
+We will go over both approaches.
+
+Prerequisite is you have `python` installed.
+The `automation/setup.sh` will create python virtual environment. 
+You need to source it afterwards:
+```shell
+source aut-venv/bin/activate 
+```
+
+`setup.py` will build custom docker image. Script `start.py` will
+execute the couchbase docker container and will setup the initial
+cluster and bucket. Mainly useful during development when you 
+need quick turnaround.
+
+Go to [http://localhost:8091](http://localhost:8091) and login with
+username `Administrator` and password `password`.
+
 # Couchbase samples
 Run vanilla couchbase server in docker
 ````

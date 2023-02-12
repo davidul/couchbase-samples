@@ -52,6 +52,9 @@ if [ ! -z "$MASTER" ]
   done
 
   ipaddress=$(ifconfig eth0 | grep -w inet | tr -s ' ' |  cut -d' ' -f3)
+#https://packages.couchbase.com/releases/7.0.2/couchbase-server-community-7.0.2-amzn2.x86_64.rpm
+  echo $ipaddress
+  echo $MASTER
 
   couchbase-cli server-add -c ${MASTER} \
      --username Administrator \
