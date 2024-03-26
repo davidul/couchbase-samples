@@ -1,4 +1,5 @@
-FROM couchbase:community-7.1.1
+ARG COUCHBASE_IMAGE
+FROM $COUCHBASE_IMAGE
 
 COPY cluster-init.sh /
 

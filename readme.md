@@ -1,11 +1,33 @@
 # Organization
+This project is organized into 3 main parts:
+* `automation` - scripts to help setup things
+* `docker` - how to run couchbase in docker
+* `src` - samples code for couchbase
+
+# Setup
+Single node vanilla couchbase server can be started with:
+```shell
+docker/couchbase/single-node/start.sh
+```
+or
+```shell
+make vanilla
+```
+After server start go to [Couchbase server](http://localhost:8091/ui/index.html)
+
+This Dockerfile is for multi node cluster: 
+```shell
+docker/couchbase/Dockerfile
+```
+It contains also the initialization of the cluster and bucket.
+
 In `automation` are few scripts which can help setup things.
 Although they are not necessary and everything can be done manually.
 We will go over both approaches.
 
 Prerequisite is you have `python` installed.
 The `automation/setup.sh` will create python virtual environment. 
-You need to source it afterwards:
+You need to source it afterward:
 ```shell
 source aut-venv/bin/activate 
 ```
